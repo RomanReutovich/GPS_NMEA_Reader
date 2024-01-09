@@ -23,9 +23,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
 
     ui->setupUi(this);
-    // ui->quickWidget->setSource(QUrl(QStringLiteral("qrc:/new/prefix1/map.qml")));
-    // ui->quickWidget->show();
-    QWidget *widget = new QWidget;
+   // ui->quickWidget->setSource(QUrl(QStringLiteral("qrc:/new/prefix1/map.qml")));
+   // ui->quickWidget->show();
+  /*  QWidget *widget = new QWidget(this);
 
     QWidget *topFiller = new QWidget;
     topFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -33,8 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
     infoLabel = new QLabel(defaultLabel);
     infoLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     infoLabel->setAlignment(Qt::AlignCenter);
-
-//    QQuickWidget *qQuickWidgetMap = new QQuickWidget;
+// Czy możliwe utworzyć QQuickWidget *qQuickWidgetMap oraz dodać go w layout->addWidget(qQuickWidgetMap);
+   // QQuickWidget *qQuickWidgetMap = new QQuickWidget;
 //    qQuickWidgetMap->setSource(QUrl(QStringLiteral("qrc:/new/prefix1/map.qml")));
 //    qQuickWidgetMap->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
@@ -47,10 +47,10 @@ MainWindow::MainWindow(QWidget *parent)
     layout->addWidget(topFiller);
     layout->addWidget(infoLabel);
 
-    //layout->addWidget(qQuickWidgetMap);
+    // layout->addWidget(qQuickWidgetMap);
     layout->addWidget(bottomFiller);
     widget->setLayout(layout);
-
+    setCentralWidget(widget);*/
     createActions();
     createMenus();
 //    connect(descriptionAct, &QAction::triggered, this, &MainWindow::setPortName);
@@ -76,10 +76,10 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 //menu
 //serialPorts
 void MainWindow::selectPort(){
-    if (infoLabel->text() == systemLocationAct->statusTip()) {
+    if (infoLabel->text() == systemLocationAct1->statusTip()) {
         infoLabel->setText(defaultLabel);
     } else {
-        infoLabel->setText(systemLocationAct->statusTip());
+        infoLabel->setText(systemLocationAct1->statusTip());
     }
 };
 
@@ -221,9 +221,10 @@ void MainWindow::createActions(){
 void MainWindow::createMenus()
 {
     alignmentGroup = new QActionGroup(this);
+
     setWindowTitle(tr("NMEA Data Reader"));
     setMinimumSize(640, 480);
-    resize(480, 320);
+    resize(640, 480);
     serialMenu = menuBar()->addMenu(tr("&Serial Ports"));
     foreach (const QSerialPortInfo &port, availablePorts)
     {
@@ -241,12 +242,15 @@ void MainWindow::createMenus()
 
             QString label = "ActionLabel" + QString::number(sysLocAct_number);
             systemLocationAct1 = new QAction(label, this);
+            portMenu->addSeparator();
             systemLocationAct1 = portMenu->addAction("System location: " + port.systemLocation());
+            portMenu->addSeparator();
             systemLocationAct1->setStatusTip("System location: " + port.systemLocation());
             systemLocationAct1->setObjectName(port.portName());
             if(port.hasVendorIdentifier()){
                 alignmentGroup->addAction(systemLocationAct1);
                 systemLocationAct1->setCheckable(true);
+                // Stąd chcę żeby włączał się slot: setPortName, z imiem porta odpowiednio wybranego urządzenia
                 connect(systemLocationAct1, &QAction::toggled, this, &MainWindow::setPortName);
                 if ( i == 0)
                 {
@@ -276,11 +280,13 @@ void MainWindow::createMenus()
 }
 
 void MainWindow::setPortName()
+// Wybrane wyjscie
 {   qDebug() << systemLocationAct1->statusTip();
     if(serialPort.isOpen()){
         qDebug() << "serial is open...";
         serialPort.close();
         qDebug() << "serial closed...";
+        // Moza usunuc "else"!!!
     } else
         serialPort.setPortName(systemLocationAct1->objectName());
             serialPort.setBaudRate(QSerialPort::Baud4800, QSerialPort::AllDirections);
